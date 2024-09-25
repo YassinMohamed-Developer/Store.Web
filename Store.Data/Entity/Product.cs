@@ -16,11 +16,11 @@ namespace Store.Data.Entity
 
         public string PictureUrl { get; set; }
 
-        public ProductBrand Brand { get; set; }
+        public virtual ProductBrand Brand { get; set; }
 
         public int BrandId { get; set; }
 
-        public ProductType Type { get; set; }
+        public virtual ProductType Type { get; set; }
 
         public int TypeId { get; set; }
     }
