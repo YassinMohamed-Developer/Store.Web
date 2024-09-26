@@ -26,11 +26,15 @@ namespace Store.Web.Controllers
             => Ok(await _productService.GetAllTypesAsync());
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductDetailsDto>>> GetAllProductsAsync()
-            => Ok(await _productService.GetAllProductAsync());
+        public async Task<ActionResult<IReadOnlyList<ProductDetailsDto>>> GetAllProductsAsync(string? sort, string? search)
+            => Ok(await _productService.GetAllProductAsync(sort,search));
 
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ProductDetailsDto>>> GetProductsById(int? id)
             => Ok(await _productService.GetProductByIdAsync(id.Value));
+
+        //[HttpGet]
+        //public async Task<ActionResult<IReadOnlyList<ProductDetailsDto>>> OrderProductAsc(string? sort)
+        //    => Ok(await _productService.OrderProductsAsc(sort));
     }
 }

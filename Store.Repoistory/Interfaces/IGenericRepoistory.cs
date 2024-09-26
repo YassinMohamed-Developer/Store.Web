@@ -11,7 +11,7 @@ namespace Store.Repoistory.Interfaces
     {
         Task<TEntity> GetByIdAsync(TKey? Id);
 
-        Task<IReadOnlyList<TEntity>> GetAllAsync();
+        Task<IReadOnlyList<TEntity>> GetAllAsync(string? sort,string? search);
 
         Task<IReadOnlyList<TEntity>> GetAllAsNoTrackingAsync();
 
@@ -20,5 +20,7 @@ namespace Store.Repoistory.Interfaces
         void Update(TEntity entity);
 
         void Delete(TEntity entity);
+
+        //Task<IReadOnlyList<TEntity>> GetProductByOrderAsc(string? sort);
     }
 }

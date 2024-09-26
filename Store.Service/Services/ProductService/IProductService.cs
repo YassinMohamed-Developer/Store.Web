@@ -10,11 +10,13 @@ namespace Store.Service.Services.ProductService
     public interface IProductService
     {
        Task<ProductDetailsDto> GetProductByIdAsync(int? productid);
-        Task<IReadOnlyList<ProductDetailsDto>> GetAllProductAsync();
+        Task<IReadOnlyList<ProductDetailsDto>> GetAllProductAsync(string? sort, string? search);
 
         Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllBrandsAsync();
 
         Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllTypesAsync();
+
+        //Task<IReadOnlyList<ProductDetailsDto>> OrderProductsAsc(string? sort);
 
     }
 }
