@@ -31,7 +31,6 @@ namespace Store.Repoistory.Repositories
         {
             if(typeof(TEntity) == typeof(Product))
             {
-                _context.Products.Include(X => X.Brand).Include(X => X.Type);
 
                 if (!string.IsNullOrEmpty(search))
                 {
