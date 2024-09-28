@@ -2,6 +2,7 @@
 using Store.Data.Context;
 using Store.Data.Entity;
 using Store.Repoistory.Interfaces;
+using Store.Repoistory.Specification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +31,20 @@ namespace Store.Repoistory.Repositories
         public async Task<IReadOnlyList<TEntity>> GetAllAsync()
             => await _context.Set<TEntity>().ToListAsync();
 
+        public async Task<IReadOnlyList<TEntity>> GetAllWithSpecificationAsync(ISpecification<TEntity> specification)
+            => await SpecificationEvaluator<TEntity,TKey>.GetQuery(_context.Set<TEntity>(),specification)
+            .ToListAsync();
+
         public async Task<TEntity> GetByIdAsync(TKey? Id)
             => await _context.Set<TEntity>().FindAsync(Id);
+
+        public async Task<TEntity> GetByIdWithSpecificationAsync(ISpecification<TEntity> specification)
+            => await SpecificationEvaluator<TEntity,TKey>.GetQuery(_context.Set<TEntity>(),specification)
+            .FirstOrDefaultAsync();
+
+        public async Task<int> GetCountSpecificationAsync(ISpecification<TEntity> specification)
+            => await SpecificationEvaluator<TEntity, TKey>.GetQuery(_context.Set<TEntity>(), specification)
+            .CountAsync();
 
         public void Update(TEntity entity)
             => _context.Set<TEntity>().Update(entity);

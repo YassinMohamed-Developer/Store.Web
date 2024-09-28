@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Store.Data.Entity;
 using Store.Repoistory.Interfaces;
+using Store.Repoistory.Specification.ProductSpecs;
+using Store.Service.Helper;
 using Store.Service.Services.ProductService.Dto;
 using System;
 using System.Collections.Generic;
@@ -57,6 +59,21 @@ namespace Store.Service.Services.ProductService
             return mappedproduct;
         }
 
+        public async Task<ProductPagnatedDto<ProductDetailsDto>> GetAllProductWithSpecificationAsync(ProductSpecification specs)
+        {
+            var specfication = new ProductWithSpecification(specs);
+
+            var product = await _unitOfWork.Repository<Product, int>().GetAllWithSpecificationAsync(specfication);
+
+            var countspecs = new ProductWithCountSpecification(specs);
+
+            var count = await _unitOfWork.Repository<Product, int>().GetCountSpecificationAsync(countspecs);
+
+            var mappedproduct = _mapper.Map<IReadOnlyList<ProductDetailsDto>>(product);
+
+            return new ProductPagnatedDto<ProductDetailsDto>(specs.PageIndex,specs.PageSize, count ,mappedproduct);
+        }
+
         public async Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllTypesAsync()
         {
             var types = await _unitOfWork.Repository<ProductType, int>().GetAllAsNoTrackingAsync();
@@ -73,14 +90,15 @@ namespace Store.Service.Services.ProductService
             return mappedType;
         }
 
-        public async Task<ProductDetailsDto> GetProductByIdAsync(int? productid)
+        public async Task<ProductDetailsDto> GetProductByIdAsync(int? productId)
         {
-
-            if(productid is null)
+            if (productId is null)
             {
                 throw new Exception("Id is null");
             }
-            var product = await _unitOfWork.Repository<Product, int>().GetByIdAsync(productid.Value);
+
+            var specs = new ProductWithSpecification(productId);
+            var product = await _unitOfWork.Repository<Product, int>().GetByIdWithSpecificationAsync(specs);
 
             //var mappedproduct = new ProductDetailsDto
             //{
