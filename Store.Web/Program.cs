@@ -1,12 +1,19 @@
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using Store.Data.Context;
 using Store.Repoistory;
 using Store.Repoistory.Interfaces;
 using Store.Repoistory.Repositories;
+using Store.Service.HandleException;
+using Store.Service.Services.CacheService;
 using Store.Service.Services.ProductService;
 using Store.Service.Services.ProductService.Dto;
+using Store.Web.customMiddleware;
+using Store.Web.ExtensionMethod;
 using Store.Web.Helper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Store.Web
 {
     public class Program
@@ -26,13 +33,18 @@ namespace Store.Web
                 option.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddAutoMapper(typeof(ProductProfile));
-            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddSingleton<IConnectionMultiplexer>(option =>
+            {
+                return ConnectionMultiplexer.Connect(ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis")));
+            });
+
+            builder.Services.ApplyService();
+
 
             var app = builder.Build();
 
             //NoT Recomended to write bulk of code in the program
+
             #region Seeding
             //using (var scope = app.Services.CreateScope())
             //{
@@ -63,7 +75,11 @@ namespace Store.Web
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseMiddleware<MiddlewareException>();
+
             app.UseStaticFiles();
+
 
             app.UseHttpsRedirection();
 

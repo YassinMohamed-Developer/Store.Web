@@ -100,6 +100,12 @@ namespace Store.Service.Services.ProductService
             var specs = new ProductWithSpecification(productId);
             var product = await _unitOfWork.Repository<Product, int>().GetByIdWithSpecificationAsync(specs);
 
+            if(product is null)
+            {
+                throw new Exception("Product not Found");
+            }
+
+            #region Manual map
             //var mappedproduct = new ProductDetailsDto
             //{
             //    Id = product.Id,
@@ -110,7 +116,8 @@ namespace Store.Service.Services.ProductService
             //    PictureUrl = product.PictureUrl,
             //    Description = product.Description,
             //    Price = product.Price,
-            //};
+            //}; 
+            #endregion 
 
             var mappedproduct = _mapper.Map<ProductDetailsDto>(product);
 
