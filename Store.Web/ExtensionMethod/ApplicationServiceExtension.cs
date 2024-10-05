@@ -5,6 +5,10 @@ using Store.Service.Services.ProductService.Dto;
 using Store.Service.Services.ProductService;
 using Microsoft.AspNetCore.Mvc;
 using Store.Service.HandleException;
+using Store.Service.Services.BasketService.Dtos;
+using Store.Service.Services.BasketService;
+using Store.Repoistory.BasketRepository.BasketInterface;
+using Store.Repoistory.BasketRepository.BasketImplment;
 
 namespace Store.Web.ExtensionMethod
 {
@@ -16,6 +20,9 @@ namespace Store.Web.ExtensionMethod
             services.AddAutoMapper(typeof(ProductProfile));
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICacheService, CacheService>();
+            services.AddScoped(typeof(BasketProfile));
+            services.AddScoped<IBasketService, BasketService>();
+            services.AddScoped<IBasketRepository,BasketRepository>();
 
             services.Configure<ApiBehaviorOptions>(option =>
             {

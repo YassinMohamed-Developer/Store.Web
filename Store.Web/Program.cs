@@ -33,12 +33,17 @@ namespace Store.Web
                 option.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
+            builder.Services.AddDbContext<StoreIdentityDbContext>(option =>
+                option.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"))
+            );
+
             builder.Services.AddSingleton<IConnectionMultiplexer>(option =>
             {
                 return ConnectionMultiplexer.Connect(ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis")));
             });
 
             builder.Services.ApplyService();
+            builder.Services.ApplyIdentityService();
 
 
             var app = builder.Build();
@@ -82,6 +87,8 @@ namespace Store.Web
 
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
