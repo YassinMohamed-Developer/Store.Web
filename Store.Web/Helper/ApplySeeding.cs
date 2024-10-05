@@ -20,12 +20,12 @@ namespace Store.Web.Helper
                 try
                 {
                     var context = services.GetRequiredService<StoreDbContext>();
-                    var identitycontext = services.GetRequiredService<UserManager<AppUser>>();
+                    var Identitycontext = services.GetRequiredService<UserManager<AppUser>>();
 
                     await context.Database.MigrateAsync();
 
                     await StoreContextSeed.SeedAsync(context, loggerFactory);
-                    await IdentityContextSeed.IdentitySeedAsync(identitycontext);
+                    await IdentityContextSeed.IdentitySeedAsync(Identitycontext);
                 }
                 catch (Exception ex)
                 {
