@@ -22,5 +22,6 @@ namespace Store.Service.Services.BasketService.Dtos
         public string BrandName { get; set; }
         [Required]
         public string TypeName { get; set; }
+
     }
 }

@@ -11,7 +11,7 @@ namespace Store.Repoistory.BasketRepository.Models
     {
         public string Id { get; set; }
 
-        public int? DeliveryMethod { get; set; }
+        public int DeliveryMethodId { get; set; }
 
         public decimal ShippingPrice { get; set; }
 
