@@ -47,6 +47,17 @@ namespace Store.Repoistory
                         await context.ProductTypes.AddRangeAsync(types);
                     }
                 }
+                if(context.DeliveryMethods is not null && !context.DeliveryMethods.Any())
+                {
+                    var deliverymethod = File.ReadAllText("../Store.Repoistory/SeedData/delivery.json");
+
+                    var delivery = JsonSerializer.Deserialize<List<DeliveryMethod>>(deliverymethod);
+
+                    if(delivery is not null)
+                    {
+                        await context.DeliveryMethods.AddRangeAsync(delivery);
+                    }
+                }
 
                 if (context.Products is not null && !context.Products.Any())
                 {
