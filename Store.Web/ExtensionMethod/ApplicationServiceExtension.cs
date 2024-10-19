@@ -11,6 +11,9 @@ using Store.Repoistory.BasketRepository.BasketInterface;
 using Store.Repoistory.BasketRepository.BasketImplment;
 using Store.Service.Services.TokenService;
 using Store.Service.Services.UserService;
+using Store.Service.Services.OrderService.Dto;
+using Store.Service.Services.OrderService;
+using Store.Service.Services.PaymentService;
 
 namespace Store.Web.ExtensionMethod
 {
@@ -27,6 +30,9 @@ namespace Store.Web.ExtensionMethod
             services.AddScoped(typeof(BasketProfile));
             services.AddScoped<IBasketService, BasketService>();
             services.AddScoped<IBasketRepository,BasketRepository>();
+            services.AddAutoMapper(typeof(OrderProfile));
+            services.AddScoped<IOrderService, OrderService>();
+            
 
             services.Configure<ApiBehaviorOptions>(option =>
             {

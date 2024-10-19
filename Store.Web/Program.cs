@@ -29,8 +29,11 @@ namespace Store.Web
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwagerDocumntation();
 
+            //If you need to configure more than one configuartion you use IOption<JWT>
+            //builder.Services.Configure<JWT>(Configuration.GetSection("JWT"));
+
             builder.Services.AddDbContext<StoreDbContext>(option =>
-                option.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
             builder.Services.AddDbContext<StoreIdentityDbContext>(option =>

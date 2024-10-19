@@ -16,5 +16,9 @@ namespace Store.Repoistory.BasketRepository.Models
         public decimal ShippingPrice { get; set; }
 
         public ICollection<BasketItem> BasketItems { get; set; } = new List<BasketItem>();
+
+        public string? PaymentIntentId {  get; set; }
+
+        public string? ClientSecret { get; set; }
     }
 }
