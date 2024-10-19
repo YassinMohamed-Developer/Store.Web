@@ -27,7 +27,7 @@ namespace Store.Web
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwagerDocumntation();
 
             builder.Services.AddDbContext<StoreDbContext>(option =>
                 option.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -43,7 +43,7 @@ namespace Store.Web
             });
 
             builder.Services.ApplyService();
-            builder.Services.ApplyIdentityService();
+            builder.Services.ApplyIdentityService(builder.Configuration);
 
 
             var app = builder.Build();
