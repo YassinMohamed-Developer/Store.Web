@@ -39,9 +39,9 @@ namespace Store.Service.Services.PaymentService
             if (customerBasket is null)
                 throw new Exception("Basket Is Empty");
 
-            var deliverymethod = await _unitOfWork.Repository<DeliveryMethod, int>().GetByIdAsync(customerBasket.DeliveryMethodId.Value);
+            var deliverymethod = await _unitOfWork.Repository<DeliveryMethod, int>().GetByIdAsync(customerBasket.DeliveryMethodId);
 
-            if (deliverymethod is null)
+            if(deliverymethod is null)
                 throw new Exception("Delivery Method is not provided");
 
             decimal shippingPrice = deliverymethod.Price;
@@ -49,15 +49,19 @@ namespace Store.Service.Services.PaymentService
             foreach (var item in customerBasket.BasketItems)
             {
                 var product = await _unitOfWork.Repository<Product, int>().GetByIdAsync(item.ProductId);
-
+ 
                 if (product is null)
                     throw new Exception($"No Product with this Id : {item.ProductId}");
 
                 if (item.Price != product.Price)
                 {
                     item.Price = product.Price;
-
                 }
+                if(item.PictureUrl != product.PictureUrl)
+                    item.PictureUrl = product.PictureUrl;
+                if(item.ProductName != product.Name)
+                    item.ProductName = product.Name;
+
             }
 
             var service = new PaymentIntentService();
@@ -70,7 +74,7 @@ namespace Store.Service.Services.PaymentService
                 {
                     Amount = (long)customerBasket.BasketItems.Sum(item => item.Quantity * (item.Price * 100)) + (long)(shippingPrice * 100),
                     Currency = "usd",
-                    PaymentMethodTypes = new List<string> { "Card"}
+                    PaymentMethodTypes = new List<string> { "card" }
                 };
 
                 paymentIntent = await service.CreateAsync(oprions);

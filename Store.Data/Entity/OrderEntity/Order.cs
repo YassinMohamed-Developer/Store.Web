@@ -29,6 +29,6 @@ namespace Store.Data.Entity.OrderEntity
             => SubTotal + DeliveryMethod.Price;
         public string? BasketId { get; set; }
 
-        public string? PaymentIntentId {  get; set; }
+        public string? PaymentIntentId { get; set; }
     }
 }

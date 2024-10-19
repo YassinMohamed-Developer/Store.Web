@@ -32,7 +32,8 @@ namespace Store.Web.ExtensionMethod
             services.AddScoped<IBasketRepository,BasketRepository>();
             services.AddAutoMapper(typeof(OrderProfile));
             services.AddScoped<IOrderService, OrderService>();
-            
+            services.AddScoped<IPaymentService, PaymentService>();
+
 
             services.Configure<ApiBehaviorOptions>(option =>
             {
