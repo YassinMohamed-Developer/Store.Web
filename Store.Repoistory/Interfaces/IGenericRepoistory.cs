@@ -1,4 +1,5 @@
 ﻿using Store.Data.Entity;
+using Store.Repoistory.Specification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,12 @@ namespace Store.Repoistory.Interfaces
         Task<IReadOnlyList<TEntity>> GetAllAsync();
 
         Task<IReadOnlyList<TEntity>> GetAllAsNoTrackingAsync();
+
+        Task<IReadOnlyList<TEntity>> GetAllWithSpecificationAsync(ISpecification<TEntity> specification);
+
+        Task<int> GetCountSpecificationAsync(ISpecification<TEntity> specification);
+
+        Task<TEntity> GetByIdWithSpecificationAsync(ISpecification<TEntity> specification);
 
         Task AddAsync(TEntity entity);
 
