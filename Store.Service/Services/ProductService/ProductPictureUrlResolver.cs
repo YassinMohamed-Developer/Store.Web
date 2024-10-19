@@ -24,7 +24,7 @@ namespace Store.Service.Services.ProductService
             if (!string.IsNullOrEmpty(source.PictureUrl))
             {
                 //Kda ana 3mlt concat le localhost bta3y be url bta3 image
-                return $"{_configuration["BaseUrl"]}{source.PictureUrl}";
+                return $"{_configuration["BaseUrl"]}/{source.PictureUrl}";
             }
             return null;
         }

@@ -23,7 +23,7 @@ namespace Store.Web
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<StoreDbContext>(option =>
-                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+                option.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
