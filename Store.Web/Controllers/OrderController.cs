@@ -6,6 +6,7 @@ using Store.Data.Entity;
 using Store.Service.HandleException;
 using Store.Service.Services.OrderService;
 using Store.Service.Services.OrderService.Dto;
+using System.Net;
 using System.Security.Claims;
 
 namespace Store.Web.Controllers
@@ -27,7 +28,7 @@ namespace Store.Web.Controllers
 
             if(order is null)
             {
-                return BadRequest(new Response(400, "Error While Creating The Order"));
+                return BadRequest(new Response("Error While Creating The Order") { StatusCode = (int)HttpStatusCode.BadRequest});
             }
 
             return Ok(order);
@@ -38,7 +39,7 @@ namespace Store.Web.Controllers
             var email = User.FindFirstValue(ClaimTypes.Email);
 
             if(email is null)
-                return BadRequest(new Response(400, "This Email Don't Have Orders"));
+                return BadRequest(new Response("This Email Don't Have Orders") { StatusCode = (int)HttpStatusCode.BadRequest });
 
             var ordersByEmail = await _orderService.GetOrdersForUserAsync(email);
 

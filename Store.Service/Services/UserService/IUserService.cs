@@ -1,4 +1,5 @@
-﻿using Store.Service.Services.UserService.Dto;
+﻿using Store.Service.HandleException;
+using Store.Service.Services.UserService.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Store.Service.Services.UserService
 {
     public interface IUserService
     {
-        Task<UserDto> LogIn(LoginDto input);
+        Task<BaseResult<UserDto>> LogIn(LoginDto input);
 
         Task<UserDto> Register(RegisterDto input);
     }

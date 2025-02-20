@@ -5,6 +5,7 @@ using Store.Data.Entity.IdentityEntity;
 using Store.Service.HandleException;
 using Store.Service.Services.UserService;
 using Store.Service.Services.UserService.Dto;
+using System.Net;
 
 namespace Store.Web.Controllers
 {
@@ -20,12 +21,14 @@ namespace Store.Web.Controllers
             _userManager = userManager;
         }
         [HttpPost]
-        public async Task<ActionResult<UserDto>> LogIn(LoginDto input)
+        public async Task<ActionResult<BaseResult<UserDto>>> LogIn(LoginDto input)
         {
             var user = await _userService.LogIn(input);
 
-            if (user == null)
-                return BadRequest(new CustomException(400, "Email does not exist"));
+            if (!user.IsSucess)
+            {
+                return BadRequest(user);
+            }
 
             return Ok(user);
         }

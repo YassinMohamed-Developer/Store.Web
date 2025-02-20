@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Store.Data.Entity.IdentityEntity;
+using Store.Service.HandleException;
 using Store.Service.Services.TokenService;
 using Store.Service.Services.UserService.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,26 +26,38 @@ namespace Store.Service.Services.UserService
             _signInManager = signInManager;
             _token = token;
         }
-        public async Task<UserDto> LogIn(LoginDto input)
+        public async Task<BaseResult<UserDto>> LogIn(LoginDto input)
         {
             var user = await _userManager.FindByEmailAsync(input.Email);
 
-            if (user is  null)
-                return null;
+            if (user is null)
+            {
+                return new BaseResult<UserDto>().Failure("User Is Not Found");
+            }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user,input.Password,false);
 
             if (!result.Succeeded)
             {
-                throw new Exception("LogIn Failed");
+                return new BaseResult<UserDto>().Failure("LogIn Failed");
             }
-            return new UserDto
+            //return new UserDto
+            //{
+            //    Id = Guid.Parse(user.Id),
+            //    DisplayName = user.DisplayName,
+            //    Email = user.Email,
+            //    Token = _token.GenerateToken(user)
+            //};
+
+            var userDto = new UserDto
             {
-                Id = Guid.Parse(user.Id),
                 DisplayName = user.DisplayName,
                 Email = user.Email,
+                Id = Guid.Parse(user.Id),
                 Token = _token.GenerateToken(user)
             };
+
+            return new BaseResult<UserDto>().Sucess(userDto);
         }
 
         public async Task<UserDto> Register(RegisterDto input)

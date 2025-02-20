@@ -45,7 +45,7 @@ namespace Store.Web.ExtensionMethod
                                     .Select(x => x.ErrorMessage)
                                     .ToList();
 
-                    var errorResponse = new ValidationErrorResponse
+                    var errorResponse = new BaseResult<string>
                     {
                         Errors = errors
                     };

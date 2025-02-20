@@ -6,18 +6,14 @@ using System.Threading.Tasks;
 
 namespace Store.Service.HandleException
 {
-    public class Response
+    public class Response : Exception
     {
-        public int StatusCode { get; set; }
-
-        public string Message { get; set; }
-        public Response(int statusCode,string? message = null)
+        public Response(string message) : base(message)
         {
-            StatusCode = statusCode;
-            Message = message ?? GetMessageBasedOnStatuesCode(statusCode);
         }
+		public int StatusCode { get; set; }
 
-        public string GetMessageBasedOnStatuesCode(int statueCode)
+        private string GetMessageBasedOnStatuesCode(int statueCode)
             => StatusCode switch 
             {
                 100 => "Continue",

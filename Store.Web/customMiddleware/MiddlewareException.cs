@@ -23,21 +23,30 @@ namespace Store.Web.customMiddleware
             {
                 await _next(context);
             }
-            catch (Exception ex)
+            catch (Response ex)
             {
-                _logger.LogError(ex,ex.Message);
+                var response = context.Response;
                 context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var response = _environment.IsDevelopment() ?
-                    new CustomException((int)HttpStatusCode.InternalServerError, ex.Message, ex.StackTrace)
-                    : new CustomException((int)HttpStatusCode.InternalServerError);
+                var Devresponse = new BaseResult<string> { IsSucess = false, Errors = [ex.Message] };
 
-                var option = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower};
+                switch (ex)
+                {
+                    case Response e:
+                        response.StatusCode = e.StatusCode;
+                        break;
+
+                    default:
+                        response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        break;
+
+                }
+
+                var option = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.KebabCaseUpper};
 
                 //Object to Json File(string) you need to make Serialization
 
-                var json = JsonSerializer.Serialize(response,option);
+                var json = JsonSerializer.Serialize(Devresponse,option);
 
                 await context.Response.WriteAsync(json);
             }
