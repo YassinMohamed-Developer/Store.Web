@@ -19,7 +19,7 @@ namespace Store.Service.Services.OrderService.Dto
 
         public AddressDto ShippingAddress { get; set; }
 
-        public string? PaymentIntentId { get; set; }
+        //public string? PaymentIntentId { get; set; }
 
     }
 }

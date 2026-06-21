@@ -4,6 +4,8 @@ using Store.Data.Entity.OrderEntity;
 using Store.Repoistory.BasketRepository.BasketInterface;
 using Store.Repoistory.Interfaces;
 using Store.Repoistory.Specification;
+using Store.Service.Helper;
+using Store.Service.RabbitMQPublisherMessage;
 using Store.Service.Services.BasketService;
 using Store.Service.Services.OrderService.Dto;
 using Store.Service.Services.PaymentService;
@@ -23,14 +25,19 @@ namespace Store.Service.Services.OrderService
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
+		private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-        public OrderService(IBasketService basketService,IUnitOfWork unitOfWork,IMapper mapper,IPaymentService paymentService)
+		public OrderService(IBasketService basketService,
+            IUnitOfWork unitOfWork,IMapper mapper,
+            IPaymentService paymentService,
+            IRabbitMqPublisher rabbitMqPublisher)
         {
             _basketService = basketService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _paymentService = paymentService;
-        }
+			_rabbitMqPublisher = rabbitMqPublisher;
+		}
         public async Task<OrderDetailsDto> CreateOrderAsync(OrderDto input)
         {
             #region Get The Basket
@@ -86,14 +93,14 @@ namespace Store.Service.Services.OrderService
             #endregion
 
             #region Payment => To Do
-            var Specs = new PaymentSpecs(basket.PaymentIntentId);
+            //var Specs = new PaymentSpecs(basket.PaymentIntentId);
 
-            var ExistingOrder = await _unitOfWork.Repository<Order, Guid>().GetByIdWithSpecificationAsync(Specs);
+            //var ExistingOrder = await _unitOfWork.Repository<Order, Guid>().GetByIdWithSpecificationAsync(Specs);
 
-            if (ExistingOrder is null)
-            {
-                await _paymentService.CreateOrUpdatePaymentIntentAsync(basket);
-            }
+            //if (ExistingOrder is null)
+            //{
+            //    await _paymentService.CreateOrUpdatePaymentIntentAsync(basket);
+            //}
             #endregion
 
             #region Create Order
@@ -109,14 +116,21 @@ namespace Store.Service.Services.OrderService
                 SubTotal = subtotal,
                 DeliveryMethodId = deliverymethod.Id,
                 BuyerEmail = input.BuyerEmail,
-                PaymentIntentId = basket.PaymentIntentId,
+                //PaymentIntentId = basket.PaymentIntentId,
             };
 
             await _unitOfWork.Repository<Order, Guid>().AddAsync(order);
-            await _unitOfWork.CompleteAsync(); 
-            #endregion 
+            await _unitOfWork.CompleteAsync();
 
-            var mappedOrderDetailsDto = _mapper.Map<OrderDetailsDto>(order);
+            await _rabbitMqPublisher.PublishInvoiceAsync(new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                CustomerEmail = order.BuyerEmail
+            });
+
+			#endregion
+
+			var mappedOrderDetailsDto = _mapper.Map<OrderDetailsDto>(order);
 
             return mappedOrderDetailsDto;
         }

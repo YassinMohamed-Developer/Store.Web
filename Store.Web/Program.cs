@@ -7,12 +7,14 @@ using Store.Repoistory;
 using Store.Repoistory.Interfaces;
 using Store.Repoistory.Repositories;
 using Store.Service.HandleException;
+using Store.Service.RabbitMQConsumeMessage;
 using Store.Service.Services.CacheService;
 using Store.Service.Services.ProductService;
 using Store.Service.Services.ProductService.Dto;
 using Store.Web.customMiddleware;
 using Store.Web.ExtensionMethod;
 using Store.Web.Helper;
+using Vax.Service.Helper;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Store.Web
 {
@@ -36,7 +38,9 @@ namespace Store.Web
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            builder.Services.AddDbContext<StoreIdentityDbContext>(option =>
+			builder.Services.Configure<MailSettingsOptions>(builder.Configuration.GetSection("MailSettings"));
+
+			builder.Services.AddDbContext<StoreIdentityDbContext>(option =>
                 option.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"))
             );
 
@@ -53,8 +57,11 @@ namespace Store.Web
                 options.Configuration = "hyperpolished-guide-terra-34495.db.redis.io:16499,password=7ymgpVnhJ9B8q7bgg2LrjgGDjx6Jb44R";
 			});
 
+			builder.Services.AddHostedService<InvoicePDFConsumer>();
+            builder.Services.AddHostedService<EmailConsumer>();
 
-            var app = builder.Build();
+
+			var app = builder.Build();
 
             //NoT Recomended to write bulk of code in the program
 

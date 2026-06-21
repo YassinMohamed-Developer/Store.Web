@@ -14,6 +14,11 @@ using Store.Service.Services.UserService;
 using Store.Service.Services.OrderService.Dto;
 using Store.Service.Services.OrderService;
 using Store.Service.Services.PaymentService;
+using Store.Service.RabbitMQPublisherMessage;
+using Store.Service.Helper.GeneratePdf;
+using Castle.Core.Smtp;
+using Vax.Service.Interface;
+using Vax.Service.Implmentation;
 
 namespace Store.Web.ExtensionMethod
 {
@@ -33,9 +38,12 @@ namespace Store.Web.ExtensionMethod
             services.AddAutoMapper(typeof(OrderProfile));
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IRabbitMqPublisher,RabbitMqPublisher>();
+            services.AddScoped<IInvoicePdfGenerator, InvoicePdfGenerator>();
+            services.AddScoped<IEmailService,EmailService>();
 
 
-            services.Configure<ApiBehaviorOptions>(option =>
+			services.Configure<ApiBehaviorOptions>(option =>
             {
                 option.InvalidModelStateResponseFactory = actioncontext =>
                 {
