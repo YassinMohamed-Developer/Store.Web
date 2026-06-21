@@ -48,6 +48,11 @@ namespace Store.Web
             builder.Services.ApplyService();
             builder.Services.ApplyIdentityService(builder.Configuration);
 
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "hyperpolished-guide-terra-34495.db.redis.io:16499,password=7ymgpVnhJ9B8q7bgg2LrjgGDjx6Jb44R";
+			});
+
 
             var app = builder.Build();
 

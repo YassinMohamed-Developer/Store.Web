@@ -14,6 +14,7 @@ namespace Store.Service.Services.BasketService.Dtos
         {
             CreateMap<CustomerBasket,CustomerBasketDto>().ReverseMap();
             CreateMap<BasketItem,BasketItemDto>().ReverseMap();
-        }
+            CreateMap<CustomerBasketRequestDto, CustomerBasketDto>().ReverseMap();
+		}
     }
 }

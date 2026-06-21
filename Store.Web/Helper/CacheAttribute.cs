@@ -41,7 +41,7 @@ namespace Store.Web.Helper
 
             if (excutedrequest.Result is OkObjectResult response)
             {
-                cacheservice.SetCacheResponseAsync(cachekey, response.Value, TimeSpan.FromSeconds(_timeToLive));
+              await cacheservice.SetCacheResponseAsync(cachekey, response.Value, TimeSpan.FromHours(_timeToLive));
             }
 
         }
@@ -50,11 +50,10 @@ namespace Store.Web.Helper
         {
             StringBuilder cachekey = new StringBuilder();
 
-            cachekey.Append($"{request.Path}");
 
-            foreach (var (key,value) in request.Headers.OrderBy(x => x.Key))
+            foreach (var key in request.Query)
             {
-                cachekey.Append($"|{key}|{value}");
+			    cachekey.Append($"{request.Path}|{key.Key}:{key.Value}|");
             }
 
             return cachekey.ToString();

@@ -9,9 +9,11 @@ namespace Store.Repoistory.BasketRepository.BasketInterface
 {
     public interface IBasketRepository
     {
+
+        Task<string> AddToBasket(CustomerBasket basket);
         Task<CustomerBasket> GetBasketAsync(string Id);
 
-        Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket);
+        Task<string> UpdateBasketAsync(CustomerBasket basket);
 
 
         Task<bool> DeleteBasketAsync(string Id);

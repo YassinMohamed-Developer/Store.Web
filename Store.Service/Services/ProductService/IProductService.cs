@@ -20,5 +20,7 @@ namespace Store.Service.Services.ProductService
 
         Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllTypesAsync();
 
-    }
+        public  Task<bool> DeleteProductAsync(int id);
+
+	}
 }

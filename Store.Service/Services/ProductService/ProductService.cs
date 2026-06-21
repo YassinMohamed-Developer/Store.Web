@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Store.Data.Entity;
 using Store.Repoistory.Interfaces;
 using Store.Repoistory.Specification.ProductSpecs;
@@ -16,15 +18,17 @@ namespace Store.Service.Services.ProductService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+		private readonly IDistributedCache _distributedCache;
 
-        public ProductService(IUnitOfWork unitOfWork,IMapper mapper)
+		public ProductService(IUnitOfWork unitOfWork, IMapper mapper,IDistributedCache distributedCache)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-        }
+			_distributedCache = distributedCache;
+		}
         public async Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllBrandsAsync()
         {
-            var brands = await _unitOfWork.Repository<ProductBrand,int>().GetAllAsNoTrackingAsync();
+            var brands = await _unitOfWork.Repository<ProductBrand, int>().GetAllAsNoTrackingAsync();
 
             //IReadOnlyList<BrandTypeDetailsDto> mappedbrands = brands.Select(x => new BrandTypeDetailsDto
             //{
@@ -71,7 +75,7 @@ namespace Store.Service.Services.ProductService
 
             var mappedproduct = _mapper.Map<IReadOnlyList<ProductDetailsDto>>(product);
 
-            return new ProductPagnatedDto<ProductDetailsDto>(specs.PageIndex,specs.PageSize, count ,mappedproduct);
+            return new ProductPagnatedDto<ProductDetailsDto>(specs.PageIndex, specs.PageSize, count, mappedproduct);
         }
 
         public async Task<IReadOnlyList<BrandTypeDetailsDto>> GetAllTypesAsync()
@@ -85,7 +89,7 @@ namespace Store.Service.Services.ProductService
             //    CreateAt = x.CreateAt
             //}).ToList();
 
-            var mappedType = _mapper.Map< IReadOnlyList<BrandTypeDetailsDto>>(types);
+            var mappedType = _mapper.Map<IReadOnlyList<BrandTypeDetailsDto>>(types);
 
             return mappedType;
         }
@@ -100,7 +104,7 @@ namespace Store.Service.Services.ProductService
             var specs = new ProductWithSpecification(productId);
             var product = await _unitOfWork.Repository<Product, int>().GetByIdWithSpecificationAsync(specs);
 
-            if(product is null)
+            if (product is null)
             {
                 throw new Exception("Product not Found");
             }
@@ -122,6 +126,20 @@ namespace Store.Service.Services.ProductService
             var mappedproduct = _mapper.Map<ProductDetailsDto>(product);
 
             return mappedproduct;
+        }
+
+        public async Task<bool> DeleteProductAsync(int id)
+        {
+            var product = await _unitOfWork.Repository<Product, int>().GetByIdAsync(id);
+            if (product is null)
+            {
+                return false;
+            }
+            _unitOfWork.Repository<Product, int>().Delete(product);
+
+           await _distributedCache.RemoveAsync($"/api/Products/GetProductsById|Id:{product.Id}|");
+
+			return await _unitOfWork.CompleteAsync() > 0;
         }
     }
 }

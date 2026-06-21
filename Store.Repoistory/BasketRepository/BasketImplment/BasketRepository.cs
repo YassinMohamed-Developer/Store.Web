@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 using Store.Repoistory.BasketRepository.BasketInterface;
 using Store.Repoistory.BasketRepository.Models;
 using System;
@@ -12,30 +13,72 @@ namespace Store.Repoistory.BasketRepository.BasketImplment
 {
     public class BasketRepository : IBasketRepository
     {
-        private readonly IDatabase  _database;
+		private readonly IDistributedCache _distributedCache;
 
-        public BasketRepository(IConnectionMultiplexer connection)
+		public BasketRepository(IDistributedCache distributedCache)
         {
-            _database = connection.GetDatabase();
-        }
-        public async Task<bool> DeleteBasketAsync(string Id)
-            => await _database.KeyDeleteAsync(Id);
+			_distributedCache = distributedCache;
+		}
+
+		public async Task<string> AddToBasket(CustomerBasket basket)
+		{
+            var existingBasket = await _distributedCache.GetStringAsync(basket.Id.ToString());
+
+            if(existingBasket != null)
+            {
+                var existingBasketObj = JsonSerializer.Deserialize<CustomerBasket>(existingBasket);
+
+                foreach(var newitem in basket.BasketItems)
+                {
+                    var existingItem = existingBasketObj.BasketItems.FirstOrDefault(x => x.ProductId == newitem.ProductId);
+                    if(existingItem != null)
+                    {
+                        existingItem.Quantity += newitem.Quantity;
+                    }
+                    else
+                    {
+                        existingBasketObj.BasketItems.Add(newitem);
+                    }
+				}
+                basket = existingBasketObj;
+			}
+
+			await _distributedCache.SetStringAsync(basket.Id.ToString(),
+                System.Text.Json.JsonSerializer.Serialize(basket), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                });
+            return basket.Id.ToString();
+		}
+
+		public async Task<bool> DeleteBasketAsync(string Id)
+        {
+            await _distributedCache.RemoveAsync(Id);
+            return true;
+		}
 
         public async Task<CustomerBasket> GetBasketAsync(string Id)
         {
-            //string =>Object ==== Deserlization
-            var custometbasket =  await _database.StringGetAsync(Id);
+            var basketjson = await _distributedCache.GetStringAsync(Id);
 
-            return custometbasket.IsNullOrEmpty ? null : JsonSerializer.Deserialize<CustomerBasket>(custometbasket);
-        }
-        public async Task<CustomerBasket> UpdateBasketAsync(CustomerBasket basket)
-        {
-            var IsCreated = await _database.StringSetAsync(basket.Id,JsonSerializer.Serialize(basket),TimeSpan.FromDays(30));
+            var basket = JsonSerializer.Deserialize<CustomerBasket>(basketjson);
 
-            if (!IsCreated)
+            if(basket == null)
+            {
                 return null;
+            }
 
-            return await GetBasketAsync(basket.Id);
+            return basket;
+		}
+        public async Task<string> UpdateBasketAsync(CustomerBasket basket)
+        {
+             await _distributedCache.SetStringAsync(basket.Id.ToString(),
+                System.Text.Json.JsonSerializer.Serialize(basket), new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+			    });
+
+            return basket.Id.ToString();
         }
     }
 }

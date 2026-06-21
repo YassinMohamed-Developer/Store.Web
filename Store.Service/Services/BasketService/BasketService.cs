@@ -20,7 +20,35 @@ namespace Store.Service.Services.BasketService
             _basketRepository = basketRepository;
             _mapper = mapper;
         }
-        public async Task<bool> DeleteBasketAsync(string Id)
+
+		public async Task<string> AddToBasketAsync(CustomerBasketRequestDto basket)
+		{
+
+            var customerBasket = new CustomerBasket 
+            { 
+                DeliveryMethodId = basket.DeliveryMethodId,
+                ShippingPrice = basket.ShippingPrice,
+                PaymentIntentId = basket.PaymentIntentId,
+                ClientSecret = basket.ClientSecret,
+                BasketItems = basket.BasketItems.Select(item => new BasketItem
+                {
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Price = item.Price,
+                    Quantity = item.Quantity,
+                    PictureUrl = item.PictureUrl,
+                    BrandName = item.BrandName,
+                    TypeName = item.TypeName,
+				}).ToList(),
+                Id = GenerateNewId()
+			};
+
+            await _basketRepository.AddToBasket(customerBasket);
+
+            return customerBasket.Id.ToString();
+		}
+
+		public async Task<bool> DeleteBasketAsync(string Id)
             => await _basketRepository.DeleteBasketAsync(Id);
 
         public async Task<CustomerBasketDto> GetBasketAsync(string Id)
@@ -39,16 +67,13 @@ namespace Store.Service.Services.BasketService
 
         public async Task<CustomerBasketDto> UpdateBasketAsync(CustomerBasketDto basket)
         {
-            if(basket.Id is null)
-            {
-                basket.Id = GenerateNewId();
-            }
-
             var customerbasket = _mapper.Map<CustomerBasket>(basket);
 
             var updateBasket = await _basketRepository.UpdateBasketAsync(customerbasket);
 
-            var MapBasket = _mapper.Map<CustomerBasketDto>(updateBasket);
+            var getBasket = await _basketRepository.GetBasketAsync(updateBasket);
+
+            var MapBasket = _mapper.Map<CustomerBasketDto>(getBasket);
 
             return MapBasket;
         }

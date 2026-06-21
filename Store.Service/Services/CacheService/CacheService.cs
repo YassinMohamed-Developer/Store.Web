@@ -1,4 +1,8 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
+using Store.Data.Context;
+using Store.Data.Entity;
+using Store.Repoistory.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +14,25 @@ namespace Store.Service.Services.CacheService
 {
     public class CacheService : ICacheService
     {
-        private readonly IDatabase _database;
-        public CacheService(IConnectionMultiplexer redis)
+        private readonly IDistributedCache _distributedCache;
+		private readonly StoreDbContext _storeDbContext;
+
+		public CacheService(IDistributedCache distributedCache,StoreDbContext storeDbContext)
         {
             //_database it is make get the response cache and set the response cache
-            _database = redis.GetDatabase();
-        }
+            _distributedCache = distributedCache;
+			_storeDbContext = storeDbContext;
+		}
         public async Task<string> GetCacheResponseAsync(string Key)
         {
-           var cachedResponse = await _database.StringGetAsync(Key);
 
-            if (cachedResponse.IsNullOrEmpty)
+			var cachedResponse = await _distributedCache.GetStringAsync(Key);
+            if (string.IsNullOrEmpty(cachedResponse))
             {
                 return null;
             }
 
-            return cachedResponse.ToString();
+			return cachedResponse.ToString();
         }
 
         public async Task SetCacheResponseAsync(string Key, object Response, TimeSpan TimeToLive)
@@ -33,14 +40,36 @@ namespace Store.Service.Services.CacheService
             if (Response is null)
                 return;
 
-            ///var cahshedResponse = await _database.StringSetAsync(Key,Response,TimeToLive);
+   //         var exisitingResponse = await _distributedCache.GetStringAsync(Key);
 
+   //         if (!string.IsNullOrEmpty(exisitingResponse))
+   //         {
+   //             var existingResponseObj = JsonSerializer.Deserialize<object>(exisitingResponse);
 
-            var option = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+   //             foreach(var newItem in Response.ToString())
+   //             {
+   //                 var existingItem = existingResponseObj.ToString().FirstOrDefault(x => x == newItem);
 
-            var Json = JsonSerializer.Serialize(Response, option);
+   //                 if(existingItem != null)
+   //                 {
+   //                     continue;
+   //                 }
+   //                 else
+   //                 {
+   //                     existingResponseObj.ToString().Append(newItem);
+			//		}
+			//	}
+   //             Response = existingResponseObj;
+			//}
 
-            await _database.StringSetAsync(Key,Json,TimeToLive);
+			var option = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+            await _distributedCache.SetStringAsync(Key, System.Text.Json.JsonSerializer.Serialize(Response, option),
+               new DistributedCacheEntryOptions
+               {
+                   AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(TimeToLive.Hours),
+               });
         }
     }
+    
 }

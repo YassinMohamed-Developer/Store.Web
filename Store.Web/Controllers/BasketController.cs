@@ -25,6 +25,10 @@ namespace Store.Web.Controllers
         [HttpDelete]
         public async Task<ActionResult<bool>> DeleteBasketAsync(string Id)
             => Ok(await _basketService.DeleteBasketAsync(Id));
-    }
+
+        [HttpPost]
+        public async Task<ActionResult<string>> AddToBasketAsync(CustomerBasketRequestDto basketDto)
+            => Ok(await _basketService.AddToBasketAsync(basketDto));
+	}
 }
     
